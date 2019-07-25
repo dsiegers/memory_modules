@@ -156,7 +156,8 @@ stress.o: \
  arch/x86/include/asm/error-injection.h \
  include/asm-generic/error-injection.h arch/x86/include/asm/module.h \
  include/asm-generic/module.h arch/x86/include/asm/orc_types.h \
- arch/x86/include/asm/unistd.h arch/x86/include/uapi/asm/unistd.h \
+ include/uapi/linux/unistd.h arch/x86/include/asm/unistd.h \
+ arch/x86/include/uapi/asm/unistd.h \
  arch/x86/include/generated/uapi/asm/unistd_64.h \
  arch/x86/include/generated/asm/unistd_64_x32.h include/linux/syscalls.h \
  include/uapi/linux/aio_abi.h include/linux/fs.h include/linux/wait_bit.h \
@@ -189,8 +190,7 @@ stress.o: \
  include/linux/unaligned/packed_struct.h include/linux/list_nulls.h \
  include/uapi/linux/ipc.h arch/x86/include/uapi/asm/ipcbuf.h \
  include/uapi/asm-generic/ipcbuf.h arch/x86/include/uapi/asm/sembuf.h \
- include/uapi/linux/unistd.h include/linux/key.h \
- include/linux/assoc_array.h include/trace/syscall.h \
+ include/linux/key.h include/linux/assoc_array.h include/trace/syscall.h \
  include/linux/tracepoint.h include/linux/trace_events.h \
  include/linux/ring_buffer.h include/linux/mm.h \
  include/linux/percpu-refcount.h include/linux/resource.h \

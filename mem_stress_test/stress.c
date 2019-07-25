@@ -3,18 +3,23 @@
 #include <linux/init.h>      // included for __init and __exit macros
 
 
-
-#include <asm/unistd.h>
+#include <linux/moduleparam.h>
+#include <linux/unistd.h>
 #include <linux/syscalls.h>
 #include <linux/fcntl.h>
 #include <asm/uaccess.h>
 #include <linux/syscalls.h>
 
+#include <linux/sched.h>
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("DSiegers");
 MODULE_DESCRIPTION("Memory Stress test");
 
+DECLARE_PER_CPU(unsigned long int, freelistCounter);
+DECLARE_PER_CPU(unsigned long int, compactCounter);
+DECLARE_PER_CPU(unsigned long int, reclaimCounter);
+DECLARE_PER_CPU(unsigned long int, cpusetCounter);
 
 static void read_file(char *filename)
 {
@@ -37,21 +42,45 @@ static void read_file(char *filename)
 }
 
 
+void recur_mem_process(int i, struct page *current_page[]){
+    current_page[i] = alloc_pages(GFP_KERNEL, 3);
+    if (read_file("/proc/meminfo")>0)
+	recur_mem_process(++i, current_page);
+    __free_page(current_page[i], 3);
+    if (i>0)
+	i--;
+}
 
 static int __init hello_init(void)
 {
-    int size = 20;
     int i=0;
-    struct page *current_page[size];
+    struct page *current_page[20];
 
     printk(KERN_INFO "Stress mod installed\n");
 
-    current_page[i] = alloc_pages(GFP_KERNEL, 2);
-    
-    __free_pages(current_page[i], 2);
+    recur_mem_process(i, current_page);
+
     printk(KERN_INFO "pages de-allocated");
-    
-    read_file("/proc/meminfo");
+
+    printk(KERN_INFO "Freelist CPU 1: %li", per_cpu(freelistCounter, 1);
+    printk(KERN_INFO "Freelist CPU 1: %li", per_cpu(freelistCounter, 2);
+    printk(KERN_INFO "Freelist CPU 1: %li", per_cpu(freelistCounter, 3);
+    printk(KERN_INFO "Freelist CPU 1: %li", per_cpu(freelistCounter, 4);
+
+    printk(KERN_INFO "Freelist CPU 1: %li", per_cpu(compactCounter, 1);
+    printk(KERN_INFO "Freelist CPU 1: %li", per_cpu(compactCounter, 2);
+    printk(KERN_INFO "Freelist CPU 1: %li", per_cpu(compactCounter, 3);
+    printk(KERN_INFO "Freelist CPU 1: %li", per_cpu(compactCounter, 4);
+
+    printk(KERN_INFO "Freelist CPU 1: %li", per_cpu(reclaimCounter, 1);
+    printk(KERN_INFO "Freelist CPU 1: %li", per_cpu(reclaimCounter, 2);
+    printk(KERN_INFO "Freelist CPU 1: %li", per_cpu(reclaimCounter, 3);
+    printk(KERN_INFO "Freelist CPU 1: %li", per_cpu(reclaimCounter, 4);
+
+    printk(KERN_INFO "Freelist CPU 1: %li", per_cpu(cpusetCounter, 1);
+    printk(KERN_INFO "Freelist CPU 1: %li", per_cpu(cpusetCounter, 2);
+    printk(KERN_INFO "Freelist CPU 1: %li", per_cpu(cpusetCounter, 3);
+    printk(KERN_INFO "Freelist CPU 1: %li", per_cpu(cpusetCounter, 4);
 
     return 0;    // Non-zero return means that the module couldn't be loaded.
 }
