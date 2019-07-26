@@ -1,4 +1,3 @@
-obj-m += reader.o
 obj-m += stress.o
 
 
