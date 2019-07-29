@@ -23,24 +23,24 @@ DECLARE_PER_CPU(unsigned long int, cpusetCounter);
 
 
 
-void recur_mem_process(int i, struct page *current_page[]){
-    current_page[i] = alloc_pages(GFP_KERNEL, 3);
+void recur_mem_process(int i){
+    struct page *current_page = alloc_pages(GFP_KERNEL, 5);
 //    if (read_file("/proc/meminfo")>0)
-    if (i<19)
-	recur_mem_process(++i, current_page);
-    __free_pages(current_page[i], 3);
-    if (i>0)
-	i--;
+    if (i<1000)
+        recur_mem_process(++i);
+    __free_pages(current_page, 5);
+    i--;
 }
+
+
 
 static int __init hello_init(void)
 {
     int i=0;
-    struct page *current_page[20];
 
     printk(KERN_INFO "Stress mod installed\n");
 
-    recur_mem_process(i, current_page);
+    recur_mem_process(i);
 
     printk(KERN_INFO "pages de-allocated");
 
