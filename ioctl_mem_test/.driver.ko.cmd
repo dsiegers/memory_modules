@@ -1,0 +1,1 @@
+cmd_/home/ugrads/d/dsiegers/Documents/modules/ioctl_mem_test/driver.ko := ld -r -m elf_x86_64 -z max-page-size=0x200000 -T ./scripts/module-common.lds --build-id  -o /home/ugrads/d/dsiegers/Documents/modules/ioctl_mem_test/driver.ko /home/ugrads/d/dsiegers/Documents/modules/ioctl_mem_test/driver.o /home/ugrads/d/dsiegers/Documents/modules/ioctl_mem_test/driver.mod.o ;  true
