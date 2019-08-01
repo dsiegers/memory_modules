@@ -11,6 +11,13 @@
 #define WR_PAGE _IOW('a','a',struct page*)
 #define RD_PAGE _IOR('a','b',struct page*)
 
+struct my_data
+{
+        struct page *current_page;
+        unsigned long time;
+};
+
+
 long int get_meminfo() {
         FILE *pf;
         long int memFree;
@@ -30,13 +37,13 @@ long int get_meminfo() {
 
 
 void recur_mem_process(int i, int fd) {
-	struct page *current_page;
+	struct my_data data;
 //	alloc_pages(GFP_KERNEL, 5);
-	ioctl(fd, RD_PAGE, (struct page*) &current_page);
+	ioctl(fd, RD_PAGE, (struct my_data*) &data);
 	if (get_meminfo()>10000000);
     		recur_mem_process(++i, fd);
 //	__free_pages(current_page, 5);
-	ioctl(fd, WR_PAGE, (struct page*) &current_page);
+	ioctl(fd, WR_PAGE, (struct my_data*) &data);
 	i--;
 }
 

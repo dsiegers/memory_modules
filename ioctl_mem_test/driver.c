@@ -19,7 +19,6 @@ DECLARE_PER_CPU(unsigned long int, compactCounter);
 DECLARE_PER_CPU(unsigned long int, reclaimCounter);
 DECLARE_PER_CPU(unsigned long int, cpusetCounter);
 
-struct page *current_page = NULL;
  
 dev_t dev = 0;
 static struct class *dev_class;
@@ -32,6 +31,15 @@ static int etx_release(struct inode *inode, struct file *file);
 static ssize_t etx_read(struct file *filp, char __user *buf, size_t len,loff_t * off);
 static ssize_t etx_write(struct file *filp, const char *buf, size_t len, loff_t * off);
 static long etx_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+
+struct my_data
+{
+        struct page *current_page;
+        u64 time;
+};
+
+struct my_data data;
+
  
 static struct file_operations fops =
 {
@@ -70,12 +78,12 @@ static long etx_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
          switch(cmd) {
                 case WR_PAGE:
-                        copy_from_user(&current_page ,(struct page*) arg, sizeof(current_page));
-                        __free_pages(current_page, 5);
+                        copy_from_user(&data ,(struct my_data*) arg, sizeof(data));
+                        __free_pages(data.current_page, 5);
                         break;
                 case RD_PAGE:
-			current_page = alloc_pages(GFP_KERNEL, 5);
-                        copy_to_user((struct page*) arg, &current_page, sizeof(current_page));
+			data.current_page = alloc_pages(GFP_KERNEL, 5);
+                        copy_to_user((struct my_data*) arg, &data, sizeof(data));
                         break;
 		case PRINT_VARS:
 			printk(KERN_INFO "Freelist CPU 1: %li", per_cpu(freelistCounter, 1));
