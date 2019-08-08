@@ -24,6 +24,8 @@ dev_t dev = 0;
 static struct class *dev_class;
 static struct cdev etx_cdev;
  
+long int freelist1, freelist2, freelist3, freelist4, compact1, compact2, compact3, compact4, reclaim1, reclaim2, reclaim3, reclaim4, cpuset1, cpuset2, cpuset3, cpuset4;
+
 static int __init etx_driver_init(void);
 static void __exit etx_driver_exit(void);
 static int etx_open(struct inode *inode, struct file *file);
@@ -36,6 +38,7 @@ struct my_data
 {
         struct page *current_page;
         u64 time;
+	int freelist_inc, compact_inc, reclaim_inc, cpuset_inc; 
 };
 
 struct my_data data;
@@ -74,15 +77,57 @@ static ssize_t etx_write(struct file *filp, const char __user *buf, size_t len, 
         return 0;
 }
  
+static void get_per_cpu(void){
+	freelist1 = per_cpu(freelistCounter, 1);
+        freelist2 = per_cpu(freelistCounter, 2);
+        freelist3 = per_cpu(freelistCounter, 3);
+        freelist4 = per_cpu(freelistCounter, 4);
+	compact1 = per_cpu(compactCounter, 1);
+        compact2 = per_cpu(compactCounter, 2);
+        compact3 = per_cpu(compactCounter, 3);
+        compact4 = per_cpu(compactCounter, 4);
+	reclaim1 = per_cpu(reclaimCounter, 1);
+        reclaim2 = per_cpu(reclaimCounter, 2);
+        reclaim3 = per_cpu(reclaimCounter, 3);
+        reclaim4 = per_cpu(reclaimCounter, 4);
+	cpuset1 = per_cpu(cpusetCounter, 1);
+        cpuset2 = per_cpu(cpusetCounter, 2);
+        cpuset3 = per_cpu(cpusetCounter, 3);
+        cpuset4 = per_cpu(cpusetCounter, 4);
+}
+
+static void compare_per_cpu(void){
+	data.freelist_inc = data.compact_inc = data.reclaim_inc = data.cpuset_inc = 0;
+	if ((per_cpu(freelistCounter, 1)!=freelist1) | (per_cpu(freelistCounter, 2)!=freelist2) | (per_cpu(freelistCounter, 3)!=freelist3) | (per_cpu(freelistCounter, 4)!=freelist4))
+		data.freelist_inc = 1;
+
+	if ((per_cpu(compactCounter, 1)!=compact1) | (per_cpu(compactCounter, 2)!=compact2) | (per_cpu(compactCounter, 3)!=compact3) | (per_cpu(compactCounter, 4)!=compact4))
+                data.compact_inc = 1;
+
+	if ((per_cpu(reclaimCounter, 1)!=reclaim1) | (per_cpu(reclaimCounter, 2)!=reclaim2) | (per_cpu(reclaimCounter, 3)!=reclaim3) | (per_cpu(reclaimCounter, 4)!=reclaim4))
+                data.reclaim_inc = 1;
+
+	if ((per_cpu(cpusetCounter, 1)!=cpuset1) | (per_cpu(cpusetCounter, 2)!=cpuset2) | (per_cpu(cpusetCounter, 3)!=cpuset3) | (per_cpu(cpusetCounter, 4)!=cpuset4))
+                data.cpuset_inc = 1;
+}
+
 static long etx_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
-         switch(cmd) {
+	u64 start_time;
+	u64 end_time;
+
+        switch(cmd) {
                 case WR_PAGE:
                         copy_from_user(&data ,(struct my_data*) arg, sizeof(data));
-                        __free_pages(data.current_page, 5);
+                        __free_pages(data.current_page, 2);
                         break;
                 case RD_PAGE:
-			data.current_page = alloc_pages(GFP_KERNEL, 5);
+//			get_per_cpu();
+			start_time = ktime_get_ns();
+			data.current_page = alloc_pages(GFP_KERNEL, 2);
+			end_time = ktime_get_ns();
+			data.time = end_time - start_time;
+//			compare_per_cpu();
                         copy_to_user((struct my_data*) arg, &data, sizeof(data));
                         break;
 		case PRINT_VARS:
@@ -106,6 +151,8 @@ static long etx_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 			printk(KERN_INFO "cpuset CPU 3: %li", per_cpu(cpusetCounter, 3));
 			printk(KERN_INFO "cpuset CPU 4: %li", per_cpu(cpusetCounter, 4));
 
+			
+			break;
         }
         return 0;
 }
