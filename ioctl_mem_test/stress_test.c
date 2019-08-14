@@ -18,7 +18,6 @@ struct my_data
 	int freelist_inc, compact_inc, reclaim_inc, cpuset_inc;
 };
 
-
 long int get_meminfo() {
         FILE *pf;
         long int memFree;
@@ -36,35 +35,68 @@ long int get_meminfo() {
         }
 }
 
+/*
 
 void recur_mem_process(int i, int fd) {
-//	FILE *f = fopen("~/Documents/modules/ioctl_mem_test/time_data.csv", "w");
+	FILE *f = fopen("~/Documents/modules/ioctl_mem_test/time_data.csv", "w");
 	struct my_data data;
 //	alloc_pages(GFP_KERNEL, 5);
 	ioctl(fd, RD_PAGE, (struct my_data*) &data);
-//	fprintf(f, "%li, %d, %d, %d, %d\n", data.time, data.freelist_inc, data.compact_inc, data.reclaim_inc, data.cpuset_inc);
-//	fflush(f);
+	fprintf(f, "%li, %d, %d, %d, %d\n", data.time, data.freelist_inc, data.compact_inc, data.reclaim_inc, data.cpuset_inc);
+	fflush(f);
 	if (get_meminfo()>10000000);
     		recur_mem_process(++i, fd);
 //	__free_pages(current_page, 5);
 	ioctl(fd, WR_PAGE, (struct my_data*) &data);
 	i--;
-//	fclose(f);
+	fclose(f);
 }
+*/
 
 
+void array_mem_process(int fd) {
+	unlink("time_data.csv");
+	FILE *f = fopen("time_data.csv", "a");
+	if (!f){
+		perror("fopen failed");
+		return;
+	}
+	struct my_data *data = malloc (sizeof (struct my_data));
+	int j = 0;
+	int size = 1000;
+	struct page* *pages = malloc(size*sizeof(struct page*));
+	while (get_meminfo()>1000) {
+		if (j==size-1) {
+			size = size*2;
+			pages = realloc(pages, size*sizeof(struct page*));
+		}
+		ioctl(fd, RD_PAGE, (struct my_data*) data);
+		pages[j++] = data->current_page;
+		fprintf(f, "%li, %d, %d, %d, %d\n", data->time, data->freelist_inc, data->compact_inc, data->reclaim_inc, data->cpuset_inc);
+        	fflush(f);
+	}
+	fprintf(f, "done");
+	fflush(f);
+	fclose(f);
+	while (j>0) {
+		data->current_page = pages[--j];
+		ioctl(fd, WR_PAGE, (struct my_data*) data);
+	}
+}
 
 
 int main() {
 	int i = 0;
 	int fd;
+	
+	printf("before open file");	
 
 	fd = open("/dev/etx_device", O_RDWR);
 	if(fd < 0) {
                 printf("Cannot open device file...\n");
                 return 0;
         }
-	recur_mem_process(i, fd);
+	array_mem_process(fd);
 
 	close(fd);
 
