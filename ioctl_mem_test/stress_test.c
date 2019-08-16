@@ -31,6 +31,8 @@ long int get_meminfo() {
                 fscanf(pf, " MemTotal: %li kB ", &memFree);
                 fscanf(pf, "MemFree: %li ", &memFree);
 		fclose(pf);
+		if (memFree <210000)
+			printf("memFree = %li\n", memFree);
                 return memFree;
         }
 }
@@ -65,7 +67,7 @@ void array_mem_process(int fd) {
 	int j = 0;
 	int size = 1000;
 	struct page* *pages = malloc(size*sizeof(struct page*));
-	while (get_meminfo()>1000) {
+	while (get_meminfo()>200000) {
 		if (j==size-1) {
 			size = size*2;
 			pages = realloc(pages, size*sizeof(struct page*));
@@ -88,8 +90,6 @@ void array_mem_process(int fd) {
 int main() {
 	int i = 0;
 	int fd;
-	
-	printf("before open file");	
 
 	fd = open("/dev/etx_device", O_RDWR);
 	if(fd < 0) {

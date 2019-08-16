@@ -86,6 +86,11 @@ static void get_per_cpu(void){
 }
 
 static void compare_per_cpu(void){
+	data.freelist_inc = get_cpu_var(freelistCounter) - freelist;
+	data.compact_inc = get_cpu_var(compactCounter) - compact;
+	data.reclaim_inc = get_cpu_var(reclaimCounter) - reclaim;
+	data.cpuset_inc = get_cpu_var(cpusetCounter) - cpuset;
+/*
 	data.freelist_inc = data.compact_inc = data.reclaim_inc = data.cpuset_inc = 0;
 	if (get_cpu_var(freelistCounter)!=freelist)
 		data.freelist_inc = 1;
@@ -98,6 +103,7 @@ static void compare_per_cpu(void){
 
 	if (get_cpu_var(cpusetCounter)!=cpuset)
                 data.cpuset_inc = 1;
+*/
 }
 
 static long etx_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
