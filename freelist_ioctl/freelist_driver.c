@@ -8,6 +8,7 @@
 #include<linux/slab.h>                 //kmalloc()
 #include<linux/uaccess.h>              //copy_to/from_user()
 #include <linux/ioctl.h>
+
  
  
 #define WR_PAGE _IOW('a','a',struct page*)
@@ -23,8 +24,10 @@ DECLARE_PER_CPU(unsigned long int, freelistTry);
 dev_t dev = 0;
 static struct class *dev_class;
 static struct cdev etx_cdev;
- 
-long int freelist, if_start, endif_start, try_start;
+
+unsigned long int check = 18000000000000000000;
+unsigned long int fix_loop = 18446744073709551615;
+unsigned long int freelist, if_start, endif_start, try_start;
 
 static int __init etx_driver_init(void);
 static void __exit etx_driver_exit(void);
@@ -38,7 +41,7 @@ struct my_data
 {
         struct page *current_page;
         u64 time;
-	int freelist_inc, if_time, endif_time, try_time; 
+	unsigned long int freelist_inc, if_time, endif_time, try_time; 
 };
 
 struct my_data data;
@@ -87,9 +90,21 @@ static void get_per_cpu(void){
 
 static void compare_per_cpu(void){
 	data.freelist_inc = get_cpu_var(freelistCounter) - freelist;
+	if (data.freelist_inc > check) {
+                data.freelist_inc = fix_loop - data.freelist_inc;
+        }
 	data.if_time = get_cpu_var(freelistIf) - if_start;
-	data.endif_time = get_cpu_var(freelistEndif) - endif_start;
-	data.try_time = get_cpu_var(freelistTry) - try_start;
+	if (data.if_time > check) {
+                data.if_time = fix_loop - data.if_time;
+        } 
+        data.endif_time = get_cpu_var(freelistEndif) - endif_start;
+	if (data.endif_time > check) {
+                data.endif_time = fix_loop - data.endif_time;
+        }
+        data.try_time = get_cpu_var(freelistTry) - try_start;
+	if (data.try_time > check) {
+                data.try_time = fix_loop - data.try_time;
+        }
 }
 
 static long etx_ioctl(struct file *file, unsigned int cmd, unsigned long arg)

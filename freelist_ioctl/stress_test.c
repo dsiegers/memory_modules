@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <cmath>
 
 
 #define WR_PAGE _IOW('a','a',struct page*)
@@ -15,7 +16,7 @@ struct my_data
 {
         struct page *current_page;
         unsigned long time;
-	int freelist_inc, if_time, endif_time, try_time;
+	unsigned long int freelist_inc, if_time, endif_time, try_time;
 };
 
 long int get_meminfo() {
@@ -67,14 +68,26 @@ void array_mem_process(int fd) {
 	int j = 0;
 	int size = 1000;
 	struct page* *pages = malloc(size*sizeof(struct page*));
-	while (get_meminfo()>125000) {
+	while (get_meminfo()>1000) {
 		if (j==size-1) {
 			size = size*2;
 			pages = realloc(pages, size*sizeof(struct page*));
 		}
 		ioctl(fd, RD_PAGE, (struct my_data*) data);
 		pages[j++] = data->current_page;
-		fprintf(f, "%li, %d, %d, %d, %d\n", data->time, data->freelist_inc, data->if_time, data->endif_time, data->try_time);
+		if (data.freelist_inc > 18000000000000000000) {
+                        data.freelist_inc = pow(2,64)-1 - data.freelist_inc;
+                }
+		if (data.if_time > 18000000000000000000) {
+       		        data.if_time = pow(2,64)-1 - data.if_time;
+        	}
+		if (data.endif_time > 18000000000000000000) {
+                        data.endif_time = pow(2,64)-1 - data.endif_time;
+                }
+		if (data.try_time > 18000000000000000000) {
+                        data.try_time = pow(2,64)-1 - data.try_time;
+                }	
+		fprintf(f, "%lu, %lu, %lu, %lu, %lu\n", data->time, data->freelist_inc, data->if_time, data->endif_time, data->try_time);
         	fflush(f);
 	}
 	fprintf(f, "done");
