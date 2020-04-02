@@ -184,5 +184,5 @@ module_exit(etx_driver_exit);
  
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("DSiegers");
-MODULE_DESCRIPTION("A simple device driver");
+MODULE_DESCRIPTION("A simple device driver for kernel function timing");
 MODULE_VERSION("1.0");
