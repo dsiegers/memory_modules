@@ -32,30 +32,9 @@ long int get_meminfo() {
                 fscanf(pf, " MemTotal: %li kB ", &memFree);
                 fscanf(pf, "MemFree: %li ", &memFree);
 		fclose(pf);
-//		if (memFree <210000)
-//			printf("memFree = %li\n", memFree);
                 return memFree;
         }
 }
-
-/*
-
-void recur_mem_process(int i, int fd) {
-	FILE *f = fopen("~/Documents/modules/ioctl_mem_test/time_data.csv", "w");
-	struct my_data data;
-//	alloc_pages(GFP_KERNEL, 5);
-	ioctl(fd, RD_PAGE, (struct my_data*) &data);
-	fprintf(f, "%li, %d, %d, %d, %d\n", data.time, data.freelist_inc, data.compact_inc, data.reclaim_inc, data.cpuset_inc);
-	fflush(f);
-	if (get_meminfo()>10000000);
-    		recur_mem_process(++i, fd);
-//	__free_pages(current_page, 5);
-	ioctl(fd, WR_PAGE, (struct my_data*) &data);
-	i--;
-	fclose(f);
-}
-*/
-
 
 void array_mem_process(int fd) {
 	unlink("time_data.csv");
