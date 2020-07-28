@@ -1,3 +1,3 @@
-/home/ugrads/d/dsiegers/Documents/modules/freelist_ioctl/freelist_driver.ko
-/home/ugrads/d/dsiegers/Documents/modules/freelist_ioctl/freelist_driver.o
+/home/dsiegers/memory_modules/freelist_ioctl/freelist_driver.ko
+/home/dsiegers/memory_modules/freelist_ioctl/freelist_driver.o
 
